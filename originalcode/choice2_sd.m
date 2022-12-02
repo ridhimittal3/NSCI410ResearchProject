@@ -1,48 +1,39 @@
 function [out]=choice2_sd() % function has no input, returns out
-
 global s
-
 
 %%%% Simulating the example given on p. 263 (choosing between gamble A and gamble B) of Birnbaum (2005) %%%%
 %%%% Birnbaum, M. H., (2005). A comparison of five models that predict violations of first-order stochastic dominance
-%%%% in risky decision making. The Jounal of Risk and Uncertainty, 31(3), 263-287.
+%%%% in risky decision making. The Journal of Risk and Uncertainty, 31(3), 263-287.
+A_val=[96, 14, 12];
+A_prob=[0.9, 0.05, 0.05];
+A=[A_val(:), A_prob(:)];
 
-B1=abs(util(96)-util(14))*(0.85)*(0.05)*sqrt((1+abs(util(96)-util(14))*sqrt(s))/(abs(util(96)-util(14))*sqrt(s)));
-B2=abs(util(96)-util(12))*(0.85)*(0.05)*sqrt((1+abs(util(96)-util(12))*sqrt(s))/(abs(util(96)-util(12))*sqrt(s)));
-B3=abs(util(90)-util(96))*(0.05)*(0.9)*sqrt((1+abs(util(90)-util(96))*sqrt(s))/(abs(util(90)-util(96))*sqrt(s)));
-B4=abs(util(90)-util(14))*(0.05)*(0.05)*sqrt((1+abs(util(90)-util(14))*sqrt(s))/(abs(util(90)-util(14))*sqrt(s)));
-B5=abs(util(90)-util(12))*(0.05)*(0.05)*sqrt((1+abs(util(90)-util(12))*sqrt(s))/(abs(util(90)-util(12))*sqrt(s)));
-B6=abs(util(12)-util(96))*(0.1)*(0.9)*sqrt((1+abs(util(12)-util(96))*sqrt(s))/(abs(util(12)-util(96))*sqrt(s)));
-B7=abs(util(12)-util(14))*(0.1)*(0.05)*sqrt((1+abs(util(12)-util(14))*sqrt(s))/(abs(util(12)-util(14))*sqrt(s)));
+B_val=[96, 90, 12];
+B_prob=[0.85, 0.05, 0.1];
+B=[B_val(:), B_prob(:)];
 
-% fprintf('\n%f\n', B1);
-% fprintf('%f\n', B2);
-% fprintf('%f\n', B3);
-% fprintf('%f\n', B4);
-% fprintf('%f\n', B5);
-% fprintf('%f\n', B6);
-% fprintf('%f\n', B7);
+i=1;
+x=zeros(9,3);
 
-B_t=B1+B2+B3+B4+B5+B6+B7;
-% fprintf('\n%f\n', B_t);
-
-rnd_B=rand;
-% fprintf('\n%f\n', rnd_B);
-
-if (rnd_B<(B1/B_t))
-    out=util(96)-util(14);
-elseif (rnd_B<(B1+B2)/B_t)
-    out=util(96)-util(12);
-elseif (rnd_B<(B1+B2+B3)/B_t)
-    out=util(90)-util(96);
-elseif (rnd_B<(B1+B2+B3+B4)/B_t)
-    out=util(90)-util(14);
-elseif (rnd_B<(B1+B2+B3+B4+B5)/B_t)
-    out=util(90)-util(12);
-elseif (rnd_B<(B1+B2+B3+B4+B5+B6)/B_t)
-    out=util(12)-util(96);
-elseif (rnd_B<(B1+B2+B3+B4+B5+B6+B7)/B_t)
-    out=util(12)-util(14);
+for b = 1:length(B)
+    for a = 1:length(A)
+        value=abs(util(B_val(b))-util(A_val(a)))*(B_prob(b))*(A_prob(a))*sqrt((1+abs(util(B_val(b))-util(A_val(a)))*sqrt(s))/(abs(util(B_val(b))-util(A_val(a)))*sqrt(s)));
+        if ~isnan(value)
+            x(i,1)=value;
+            x(i,2)=A_val(a);
+            x(i,3)=B_val(b);
+            i=i+1;
+        end
+    end
 end
 
+
+B_t=sum(x(:,1));
+rnd_B=rand;
+
+for i = 1:sum(all(x~=0,2))
+    if (rnd_B<(sum(x(1:i,1))/B_t))
+        out=util(x(i,3))-util(x(i,2));
+        break
+    end
 end
